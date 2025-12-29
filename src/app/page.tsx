@@ -73,14 +73,14 @@ export default function Home() {
       <section className="py-20 sm:py-32">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card px-4 py-2 text-sm">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-xs border bg-card/50 px-4 py-2 text-sm">
               <Sparkles className="size-4 text-primary" />
               <span className="text-muted-foreground">Join 10,000+ subscribers</span>
             </div>
             <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
               Stay Informed, Stay Ahead
             </h1>
-            <p className="mb-8 text-lg text-muted-foreground sm:text-xl">
+            <p className="mb-8 text-muted-foreground">
               Get weekly insights, curated content, and exclusive updates delivered straight to your inbox. 
               No spam, just value.
             </p>
@@ -94,13 +94,12 @@ export default function Home() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="flex-1"
+                  className="flex-1 rounded-xs"
                 />
                 <Button 
                   type="submit" 
-                  size="lg"
                   disabled={isSubmitting}
-                  className="sm:w-auto"
+                  className="sm:w-auto rounded-xs"
                 >
                   {isSubmitting ? (
                     "Subscribing..."
@@ -112,9 +111,6 @@ export default function Home() {
                   )}
                 </Button>
               </div>
-              <p className="mt-3 text-xs text-muted-foreground">
-                We respect your privacy. Unsubscribe at any time.
-              </p>
             </form>
 
             {/* Stats */}
@@ -137,13 +133,13 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 sm:py-32">
+      <section className="bg-muted/15 py-20 sm:py-32">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-16">
             <h2 className="mb-4 text-3xl font-bold sm:text-4xl">
               Why Subscribe?
             </h2>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-muted-foreground">
               Everything you need to stay informed and ahead of the curve.
             </p>
           </div>
@@ -151,9 +147,9 @@ export default function Home() {
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <Card key={index} className="">
+                <Card key={index} className="rounded-xs">
                   <CardHeader>
-                    <div className="mb-4 inline-flex size-12 items-center justify-center rounded-lg bg-primary/10">
+                    <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xs bg-primary/10">
                       <Icon className="size-6 text-primary" />
                     </div>
                     <CardTitle>{feature.title}</CardTitle>
@@ -171,19 +167,19 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="bg-muted/50 py-20 sm:py-32">
+      <section className="py-20 sm:py-32">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-16">
             <h2 className="mb-4 text-3xl font-bold sm:text-4xl">
               Loved by Our Readers
             </h2>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-muted-foreground">
               See what our subscribers are saying about us.
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {testimonials.map((testimonial, index) => (
-              <Card key={index}>
+              <Card key={index} className="rounded-xs">
                 <CardHeader>
                   <div className="mb-2 flex gap-1">
                     {[...Array(testimonial.rating)].map((_, i) => (
@@ -205,13 +201,13 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 sm:py-32">
+      <section className="bg-muted/15 py-20 sm:py-32">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="mx-auto max-w-2xl">
+          <Card className="mx-auto max-w-2xl rounded-xs">
             <CardHeader className="text-center">
               <Mail className="mx-auto mb-4 size-12 text-primary" />
               <CardTitle className="text-3xl">Ready to Get Started?</CardTitle>
-              <CardDescription className="text-base">
+              <CardDescription className="text-muted-foreground">
                 Join thousands of subscribers and never miss an update.
               </CardDescription>
             </CardHeader>
@@ -223,13 +219,12 @@ export default function Home() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="flex-1"
+                  className="flex-1 rounded-xs"
                 />
                 <Button 
                   type="submit" 
-                  size="lg"
                   disabled={isSubmitting}
-                  className="sm:w-auto"
+                  className="sm:w-auto rounded-xs"
                 >
                   {isSubmitting ? "Subscribing..." : "Subscribe Now"}
                 </Button>
