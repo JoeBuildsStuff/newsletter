@@ -4,6 +4,7 @@ import { Calendar, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
+import { NewsletterRating } from "@/components/newsletter-rating";
 
 function formatDate(dateString: string | null): string {
   if (!dateString) return "";
@@ -68,6 +69,12 @@ export default async function NewsletterDetailPage({
                 <div className="whitespace-pre-wrap text-foreground">
                   {newsletter.content}
                 </div>
+              </div>
+              
+              {/* Rating Section */}
+              <div className="mt-8 pt-8 border-t">
+                <h3 className="text-lg font-semibold mb-4">Rate this Newsletter</h3>
+                <NewsletterRating newsletterId={newsletter.id} />
               </div>
             </CardContent>
           </Card>

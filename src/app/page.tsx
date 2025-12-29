@@ -8,6 +8,7 @@ import {
   Mail,
   Star
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 function formatSubscriberCount(count: number): string {
   if (count >= 1000) {
@@ -76,12 +77,11 @@ export default async function Home() {
 
             {/* View Newsletters Link */}
             <div className="mb-8">
-              <a 
-                href="/newsletters" 
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
-              >
-                View published newsletters →
-              </a>
+              <Button asChild variant="link" size="sm" className="text-muted-foreground">
+                <a href="/newsletters">
+                  View past newsletters
+                </a>
+              </Button>
             </div>
 
             {/* Stats */}

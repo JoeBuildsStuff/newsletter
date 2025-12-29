@@ -156,6 +156,41 @@ export type Database = {
           },
         ]
       }
+      newsletter_ratings: {
+        Row: {
+          id: string
+          newsletter_id: string
+          user_id: string
+          rating: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          newsletter_id: string
+          user_id: string
+          rating: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          newsletter_id?: string
+          user_id?: string
+          rating?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletter_ratings_newsletter_id_fkey"
+            columns: ["newsletter_id"]
+            isOneToOne: false
+            referencedRelation: "newsletters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -188,3 +223,7 @@ export type TestimonialUpdate = Database['newsletter']['Tables']['testimonials']
 export type NewsletterSubscriberLink = Database['newsletter']['Tables']['newsletter_subscribers']['Row']
 export type NewsletterSubscriberLinkInsert = Database['newsletter']['Tables']['newsletter_subscribers']['Insert']
 export type NewsletterSubscriberLinkUpdate = Database['newsletter']['Tables']['newsletter_subscribers']['Update']
+
+export type NewsletterRating = Database['newsletter']['Tables']['newsletter_ratings']['Row']
+export type NewsletterRatingInsert = Database['newsletter']['Tables']['newsletter_ratings']['Insert']
+export type NewsletterRatingUpdate = Database['newsletter']['Tables']['newsletter_ratings']['Update']

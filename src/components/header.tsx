@@ -1,7 +1,7 @@
 import Logo from "@/components/logo";
-import { ModeToggle } from "@/components/mode-toggle";
 import { Mails } from "lucide-react";
 import Link from "next/link";
+import { AuthButton } from "@/components/auth-button";
 
 export function Header() {
   return (
@@ -17,7 +17,7 @@ export function Header() {
           >
             Newsletters
           </Link>
-          <ModeToggle align="end" />
+          <AuthButton variant="avatar" />
         </div>
       </div>
     </header>
