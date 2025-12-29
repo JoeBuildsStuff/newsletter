@@ -1,32 +1,35 @@
-"use client";
-
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { NewsletterForm } from "@/components/newsletter-form";
+import { getTestimonials, getSubscriberCount, getAverageRating } from "@/app/actions/get-data";
 import { 
   Sparkles, 
   TrendingUp, 
   Users, 
   Mail,
-  ArrowRight,
   Star
 } from "lucide-react";
 
-export default function Home() {
-  const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+function formatSubscriberCount(count: number): string {
+  if (count >= 1000) {
+    const thousands = (count / 1000).toFixed(1);
+    return `${thousands.replace(/\.0$/, "")}K+`;
+  }
+  return count.toString();
+}
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setEmail("");
-      alert("Thanks for subscribing! We'll be in touch soon.");
-    }, 1000);
-  };
+export default async function Home() {
+  // Fetch data from database
+  const [testimonialsResult, subscriberCountResult, ratingResult] = await Promise.all([
+    getTestimonials(),
+    getSubscriberCount(),
+    getAverageRating(),
+  ]);
+
+  const testimonials = testimonialsResult.success ? testimonialsResult.data : [];
+  const subscriberCount = subscriberCountResult.success ? subscriberCountResult.count : 0;
+  const averageRating = ratingResult.success && ratingResult.rating > 0 
+    ? ratingResult.rating 
+    : 4.9; // Fallback to 4.9 if no ratings exist
 
   const features = [
     {
@@ -46,27 +49,6 @@ export default function Home() {
     },
   ];
 
-  const testimonials = [
-    {
-      name: "Sarah Chen",
-      role: "Product Manager",
-      content: "This newsletter has become my go-to source for industry insights. Highly recommended!",
-      rating: 5
-    },
-    {
-      name: "Michael Rodriguez",
-      role: "Software Engineer",
-      content: "The quality of content is outstanding. I look forward to every issue.",
-      rating: 5
-    },
-    {
-      name: "Emily Johnson",
-      role: "Designer",
-      content: "Best newsletter I've subscribed to. Always relevant and well-curated.",
-      rating: 5
-    },
-  ];
-
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -75,7 +57,9 @@ export default function Home() {
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-xs border bg-card/50 px-4 py-2 text-sm">
               <Sparkles className="size-4 text-primary" />
-              <span className="text-muted-foreground">Join 10,000+ subscribers</span>
+              <span className="text-muted-foreground">
+                Join {formatSubscriberCount(subscriberCount)} subscribers
+              </span>
             </div>
             <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
               Stay Informed, Stay Ahead
@@ -86,41 +70,28 @@ export default function Home() {
             </p>
             
             {/* Email Signup Form */}
-            <form onSubmit={handleSubmit} className="mx-auto mb-12 max-w-md">
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="flex-1 rounded-xs"
-                />
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="sm:w-auto rounded-xs"
-                >
-                  {isSubmitting ? (
-                    "Subscribing..."
-                  ) : (
-                    <>
-                      Subscribe
-                      <ArrowRight className="size-4" />
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
+            <div className="mx-auto mb-12 max-w-md">
+              <NewsletterForm />
+            </div>
+
+            {/* View Newsletters Link */}
+            <div className="mb-8">
+              <a 
+                href="/newsletters" 
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
+              >
+                View published newsletters →
+              </a>
+            </div>
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-8 text-center">
               <div>
-                <div className="text-3xl font-bold">10K+</div>
+                <div className="text-3xl font-bold">{formatSubscriberCount(subscriberCount)}</div>
                 <div className="text-sm text-muted-foreground">Subscribers</div>
               </div>
               <div>
-                <div className="text-3xl font-bold">4.9</div>
+                <div className="text-3xl font-bold">{averageRating}</div>
                 <div className="text-sm text-muted-foreground">Rating</div>
               </div>
               <div>
@@ -178,24 +149,30 @@ export default function Home() {
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="rounded-xs">
-                <CardHeader>
-                  <div className="mb-2 flex gap-1">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="size-4 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <CardDescription className="text-base">
-                    &ldquo;{testimonial.content}&rdquo;
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="font-semibold">{testimonial.name}</div>
-                  <div className="text-sm text-muted-foreground">{testimonial.role}</div>
-                </CardContent>
-              </Card>
-            ))}
+            {testimonials.length > 0 ? (
+              testimonials.map((testimonial) => (
+                <Card key={testimonial.id} className="rounded-xs">
+                  <CardHeader>
+                    <div className="mb-2 flex gap-1">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="size-4 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    <CardDescription className="text-base">
+                      &ldquo;{testimonial.content}&rdquo;
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="font-semibold">{testimonial.name}</div>
+                    <div className="text-sm text-muted-foreground">{testimonial.role}</div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-3 text-center text-muted-foreground py-8">
+                No testimonials available yet.
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -212,23 +189,7 @@ export default function Home() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row">
-                <Input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="flex-1 rounded-xs"
-                />
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="sm:w-auto rounded-xs"
-                >
-                  {isSubmitting ? "Subscribing..." : "Subscribe Now"}
-                </Button>
-              </form>
+              <NewsletterForm buttonText="Subscribe Now" showIcon={false} />
             </CardContent>
           </Card>
         </div>
