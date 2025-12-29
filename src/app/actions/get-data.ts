@@ -71,46 +71,35 @@ export async function getSubscriberCount() {
   }
 }
 
-export async function getAverageRating() {
+export async function getTotalLikes() {
   try {
     const supabase = await createClient();
 
-    // Get all testimonials to calculate the true average rating
-    const { data, error } = await supabase
-      .from("newsletter.testimonials")
-      .select("rating");
+    // Get total count of all likes across all newsletters
+    const { count, error } = await supabase
+      .schema("newsletter")
+      .from("newsletter_likes")
+      .select("*", { count: "exact", head: true });
 
     if (error) {
-      console.error("Error fetching ratings:", error);
+      console.error("Error fetching likes:", error);
       return {
         success: false,
-        rating: 0,
+        count: 0,
         error: error.message,
       };
     }
 
-    if (!data || data.length === 0) {
-      return {
-        success: true,
-        rating: 0,
-        count: 0,
-      };
-    }
-
-    const sum = data.reduce((acc, t) => acc + (t.rating || 0), 0);
-    const average = Math.round((sum / data.length) * 10) / 10;
-
     return {
       success: true,
-      rating: average,
-      count: data.length,
+      count: count || 0,
     };
   } catch (error) {
-    console.error("Error calculating average rating:", error);
+    console.error("Error calculating total likes:", error);
     return {
       success: false,
-      rating: 0,
-      error: "Failed to calculate average rating",
+      count: 0,
+      error: "Failed to calculate total likes",
     };
   }
 }

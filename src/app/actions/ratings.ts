@@ -2,16 +2,9 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import type { NewsletterRatingInsert } from "@/types/database";
+import type { NewsletterLikeInsert } from "@/types/database";
 
-export async function submitRating(newsletterId: string, rating: number) {
-  if (rating < 1 || rating > 5) {
-    return {
-      success: false,
-      error: "Rating must be between 1 and 5",
-    };
-  }
-
+export async function toggleLike(newsletterId: string) {
   try {
     const supabase = await createClient();
 
@@ -24,76 +17,71 @@ export async function submitRating(newsletterId: string, rating: number) {
     if (userError || !user) {
       return {
         success: false,
-        error: "You must be logged in to rate newsletters",
+        error: "You must be logged in to like newsletters",
       };
     }
 
-    // Check if user has already rated this newsletter
-    const { data: existingRating } = await supabase
+    // Check if user has already liked this newsletter
+    const { data: existingLike } = await supabase
       .schema("newsletter")
-      .from("newsletter_ratings")
-      .select("id, rating")
+      .from("newsletter_likes")
+      .select("id")
       .eq("newsletter_id", newsletterId)
       .eq("user_id", user.id)
       .single();
 
-    const now = new Date().toISOString();
-
-    if (existingRating) {
-      // Update existing rating
-      const { error: updateError } = await supabase
+    if (existingLike) {
+      // Unlike - delete the like
+      const { error: deleteError } = await supabase
         .schema("newsletter")
-        .from("newsletter_ratings")
-        .update({
-          rating,
-          updated_at: now,
-        })
-        .eq("id", existingRating.id);
+        .from("newsletter_likes")
+        .delete()
+        .eq("id", existingLike.id);
 
-      if (updateError) {
-        console.error("Error updating rating:", updateError);
+      if (deleteError) {
+        console.error("Error removing like:", deleteError);
         return {
           success: false,
-          error: "Failed to update rating. Please try again.",
+          error: "Failed to remove like. Please try again.",
         };
       }
 
       revalidatePath(`/newsletters/${newsletterId}`);
       return {
         success: true,
-        message: "Rating updated successfully",
+        liked: false,
+        message: "Like removed",
       };
     } else {
-      // Create new rating
-      const newRating: NewsletterRatingInsert = {
+      // Like - create new like
+      const newLike: NewsletterLikeInsert = {
         newsletter_id: newsletterId,
         user_id: user.id,
-        rating,
-        created_at: now,
-        updated_at: now,
+        created_at: new Date().toISOString(),
       };
 
       const { error: insertError } = await supabase
         .schema("newsletter")
-        .from("newsletter_ratings")
-        .insert(newRating);
+        .from("newsletter_likes")
+        .insert(newLike);
 
       if (insertError) {
-        console.error("Error creating rating:", insertError);
+        console.error("Error creating like:", insertError);
         return {
           success: false,
-          error: "Failed to submit rating. Please try again.",
+          error: "Failed to like newsletter. Please try again.",
         };
       }
 
       revalidatePath(`/newsletters/${newsletterId}`);
       return {
         success: true,
-        message: "Rating submitted successfully",
+        liked: true,
+        message: "Newsletter liked!",
       };
     }
   } catch (error) {
-    console.error("Rating error:", error);
+    console.error("Like error:", error);
     return {
       success: false,
       error: "An unexpected error occurred. Please try again.",
@@ -101,7 +89,7 @@ export async function submitRating(newsletterId: string, rating: number) {
   }
 }
 
-export async function getUserRating(newsletterId: string) {
+export async function getUserLike(newsletterId: string) {
   try {
     const supabase = await createClient();
 
@@ -113,85 +101,71 @@ export async function getUserRating(newsletterId: string) {
     if (userError || !user) {
       return {
         success: true,
-        rating: null,
+        liked: false,
       };
     }
 
     const { data, error } = await supabase
       .schema("newsletter")
-      .from("newsletter_ratings")
-      .select("rating")
+      .from("newsletter_likes")
+      .select("id")
       .eq("newsletter_id", newsletterId)
       .eq("user_id", user.id)
       .single();
 
     if (error && error.code !== "PGRST116") {
       // PGRST116 is "no rows returned" which is fine
-      console.error("Error fetching user rating:", error);
+      console.error("Error fetching user like:", error);
       return {
         success: false,
-        rating: null,
+        liked: false,
         error: error.message,
       };
     }
 
     return {
       success: true,
-      rating: data?.rating || null,
+      liked: !!data,
     };
   } catch (error) {
-    console.error("Error fetching user rating:", error);
+    console.error("Error fetching user like:", error);
     return {
       success: false,
-      rating: null,
-      error: "Failed to fetch rating",
+      liked: false,
+      error: "Failed to fetch like status",
     };
   }
 }
 
-export async function getNewsletterRatingStats(newsletterId: string) {
+export async function getNewsletterLikeCount(newsletterId: string) {
   try {
     const supabase = await createClient();
 
-    const { data, error } = await supabase
+    const { count, error } = await supabase
       .schema("newsletter")
-      .from("newsletter_ratings")
-      .select("rating")
+      .from("newsletter_likes")
+      .select("*", { count: "exact", head: true })
       .eq("newsletter_id", newsletterId);
 
     if (error) {
-      console.error("Error fetching rating stats:", error);
+      console.error("Error fetching like count:", error);
       return {
         success: false,
-        averageRating: 0,
-        totalRatings: 0,
+        count: 0,
         error: error.message,
       };
     }
 
-    if (!data || data.length === 0) {
-      return {
-        success: true,
-        averageRating: 0,
-        totalRatings: 0,
-      };
-    }
-
-    const sum = data.reduce((acc, r) => acc + (r.rating || 0), 0);
-    const average = Math.round((sum / data.length) * 10) / 10;
-
     return {
       success: true,
-      averageRating: average,
-      totalRatings: data.length,
+      count: count || 0,
     };
   } catch (error) {
-    console.error("Error calculating rating stats:", error);
+    console.error("Error calculating like count:", error);
     return {
       success: false,
-      averageRating: 0,
-      totalRatings: 0,
-      error: "Failed to calculate rating statistics",
+      count: 0,
+      error: "Failed to calculate like count",
     };
   }
 }

@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { NewsletterForm } from "@/components/newsletter-form";
-import { getTestimonials, getSubscriberCount, getAverageRating } from "@/app/actions/get-data";
+import { getTestimonials, getSubscriberCount, getTotalLikes } from "@/app/actions/get-data";
 import { 
   Sparkles, 
   TrendingUp, 
@@ -20,23 +20,21 @@ function formatSubscriberCount(count: number): string {
 
 export default async function Home() {
   // Fetch data from database
-  const [testimonialsResult, subscriberCountResult, ratingResult] = await Promise.all([
+  const [testimonialsResult, subscriberCountResult, likesResult] = await Promise.all([
     getTestimonials(),
     getSubscriberCount(),
-    getAverageRating(),
+    getTotalLikes(),
   ]);
 
   const testimonials = testimonialsResult.success ? testimonialsResult.data : [];
   const subscriberCount = subscriberCountResult.success ? subscriberCountResult.count : 0;
-  const averageRating = ratingResult.success && ratingResult.rating > 0 
-    ? ratingResult.rating 
-    : 4.9; // Fallback to 4.9 if no ratings exist
+  const totalLikes = likesResult.success ? likesResult.count : 0;
 
   const features = [
     {
       icon: Sparkles,
       title: "Curated Content",
-      description: "Hand-picked articles and insights delivered to your inbox weekly."
+      description: "Hand-picked articles and insights delivered to your inbox monthly."
     },
     {
       icon: TrendingUp,
@@ -66,7 +64,7 @@ export default async function Home() {
               Stay Informed, Stay Ahead
             </h1>
             <p className="mb-8 text-muted-foreground">
-              Get weekly insights, curated content, and exclusive updates delivered straight to your inbox. 
+              Get monthly insights, curated content, and exclusive updates delivered straight to your inbox. 
               No spam, just value.
             </p>
             
@@ -91,11 +89,11 @@ export default async function Home() {
                 <div className="text-sm text-muted-foreground">Subscribers</div>
               </div>
               <div>
-                <div className="text-3xl font-bold">{averageRating}</div>
-                <div className="text-sm text-muted-foreground">Rating</div>
+                <div className="text-3xl font-bold">{formatSubscriberCount(totalLikes)}</div>
+                <div className="text-sm text-muted-foreground">Likes</div>
               </div>
               <div>
-                <div className="text-3xl font-bold">Weekly</div>
+                <div className="text-3xl font-bold">Monthly</div>
                 <div className="text-sm text-muted-foreground">Updates</div>
               </div>
             </div>

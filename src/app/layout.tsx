@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Newsletter - Stay Informed, Stay Ahead",
-  description: "Get weekly insights, curated content, and exclusive updates delivered straight to your inbox. Join 10,000+ subscribers today.",
+  description: "Get monthly insights, curated content, and exclusive updates delivered straight to your inbox. Join 10,000+ subscribers today.",
 };
 
 export default function RootLayout({

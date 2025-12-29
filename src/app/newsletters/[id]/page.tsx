@@ -71,9 +71,9 @@ export default async function NewsletterDetailPage({
                 </div>
               </div>
               
-              {/* Rating Section */}
+              {/* Like Section */}
               <div className="mt-8 pt-8 border-t">
-                <h3 className="text-lg font-semibold mb-4">Rate this Newsletter</h3>
+                <h3 className="text-lg font-semibold mb-4">Like this Newsletter</h3>
                 <NewsletterRating newsletterId={newsletter.id} />
               </div>
             </CardContent>
